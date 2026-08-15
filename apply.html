@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#f7f5f0" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>Tribal Scholarship Application – MSP e-SERVICES</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo">
+        <img src="assets/logo.png" alt="MSP e-SERVICES" class="logo-img" />
+      </a>
+      <nav class="nav">
+        <a href="index.html">Home</a>
+        <a href="apply.html" class="active">Tribal Scholarship</a>
+        <a href="track.html">Track Application</a>
+        <a href="index.html#how-it-works">How It Works</a>
+        <a href="index.html#contact">Contact</a>
+        <a href="admin.html" class="nav-cta">Admin</a>
+      </nav>
+      <button class="hamburger" aria-label="Open menu" id="hamburger">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+    <div class="mobile-nav" id="mobileNav">
+      <a href="index.html">Home</a>
+      <a href="apply.html">Tribal Scholarship</a>
+      <a href="track.html">Track Application</a>
+        <a href="track.html">Track Application</a>
+      <a href="index.html#how-it-works">How It Works</a>
+      <a href="index.html#contact">Contact</a>
+      <a href="admin.html">Admin Login</a>
+    </div>
+  </header>
+
+  <main class="container" style="padding-bottom:3rem;">
+    <div class="page-header">
+      <h1>Tribal Scholarship Application</h1>
+      <p>Please enter your details carefully and upload clear copies of all required documents.</p>
+    </div>
+
+    <!-- Progress -->
+    <div class="progress" id="progress">
+      <div class="progress-step active" data-step="1">1. Personal Info</div>
+      <div class="progress-step" data-step="2">2. Documents</div>
+      <div class="progress-step" data-step="3">3. Review & Submit</div>
+    </div>
+
+    <form id="scholarshipForm" novalidate>
+      <!-- ========== STEP 1 ========== -->
+      <div class="form-step" id="step1">
+        <div class="form-card">
+          <h2>Applicant Information</h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="fullName">Full Name <span class="req">*</span></label>
+              <input type="text" id="fullName" name="fullName" required autocomplete="name" />
+              <span class="error-msg" id="err-fullName"></span>
+            </div>
+            <div class="form-group">
+              <label for="phone">Phone Number <span class="req">*</span></label>
+              <input type="tel" id="phone" name="phone" required placeholder="10-digit mobile number" autocomplete="tel" />
+              <span class="error-msg" id="err-phone"></span>
+            </div>
+            <div class="form-group">
+              <label for="course">Present Course <span class="req">*</span></label>
+              <input type="text" id="course" name="course" required placeholder="e.g. B.A., B.Sc., Diploma" />
+              <span class="error-msg" id="err-course"></span>
+            </div>
+            <div class="form-group">
+              <label for="startDate">Class Start Date <span class="req">*</span></label>
+              <input type="date" id="startDate" name="startDate" required />
+              <span class="error-msg" id="err-startDate"></span>
+            </div>
+            <div class="form-group">
+              <label for="rollNumber">Roll Number <span class="req">*</span></label>
+              <input type="text" id="rollNumber" name="rollNumber" required />
+              <span class="error-msg" id="err-rollNumber"></span>
+            </div>
+            <div class="form-group">
+              <label for="section">Section</label>
+              <input type="text" id="section" name="section" placeholder="Optional" />
+              <span class="error-msg"></span>
+            </div>
+            <div class="form-group full">
+              <label for="otrNumber">OTR Number <span class="req">*</span></label>
+              <input type="text" id="otrNumber" name="otrNumber" required />
+              <span class="error-msg" id="err-otrNumber"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <div></div>
+          <button type="button" class="btn btn-primary" id="btnToStep2">Continue →</button>
+        </div>
+      </div>
+
+      <!-- ========== STEP 2 ========== -->
+      <div class="form-step hidden" id="step2">
+        <div class="form-card">
+          <h2>Required Documents</h2>
+          <p style="color:var(--muted);font-size:0.92rem;margin-bottom:1.25rem;">
+            Accepted formats: JPG, JPEG, PNG, PDF. Maximum size: 5 MB per file.
+          </p>
+          <div class="upload-grid" id="uploadGrid">
+            <!-- Generated by JS -->
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" id="btnBack1">← Back</button>
+          <button type="button" class="btn btn-primary" id="btnToStep3">Continue →</button>
+        </div>
+      </div>
+
+      <!-- ========== STEP 3 ========== -->
+      <div class="form-step hidden" id="step3">
+        <div class="form-card">
+          <h2>Review Your Application</h2>
+          <p style="color:var(--muted);margin-bottom:1.5rem;">Please verify all information and documents before submitting.</p>
+
+          <div class="review-section">
+            <h3>Personal Information</h3>
+            <dl class="review-grid" id="reviewInfo"></dl>
+          </div>
+
+          <div class="review-section">
+            <h3>Uploaded Documents</h3>
+            <ul class="doc-list" id="reviewDocs"></ul>
+          </div>
+
+          <div class="confirm-box">
+            <label>
+              <input type="checkbox" id="confirmCheck" />
+              <span>I confirm that the information provided is accurate and the uploaded documents belong to me.</span>
+            </label>
+            <span class="error-msg" id="err-confirm"></span>
+          </div>
+
+          <p style="color:var(--muted);font-size:0.9rem;margin-top:1rem;">
+            Please make sure all information and documents are correct before submitting your application.
+          </p>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" id="btnBack2">← Back</button>
+          <button type="submit" class="btn btn-primary" id="btnSubmit">Submit Application</button>
+        </div>
+      </div>
+    </form>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <span>&copy; 2026 MSP e-SERVICES. All rights reserved.</span>
+      <span>Tribal Scholarship Application Portal</span>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/apply.js"></script>
+</body>
+</html>

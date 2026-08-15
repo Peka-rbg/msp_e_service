@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#f7f5f0" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>Track Application – MSP e-SERVICES</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <style>
+    .track-box {
+      max-width: 520px;
+      margin: 2.5rem auto;
+      background: var(--paper);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 2rem 1.75rem;
+      box-shadow: var(--shadow-md);
+    }
+    .track-box h1 {
+      font-size: 1.45rem;
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+    .track-box .sub {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-bottom: 1.75rem;
+    }
+    .track-result {
+      margin-top: 1.75rem;
+      border-top: 1px solid var(--border);
+      padding-top: 1.5rem;
+    }
+    .track-result.hidden { display: none; }
+    .status-large {
+      display: inline-block;
+      padding: 0.4rem 1rem;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 1rem;
+      margin: 0.75rem 0 1.25rem;
+    }
+    .track-details {
+      display: grid;
+      grid-template-columns: 130px 1fr;
+      gap: 0.45rem 1rem;
+      font-size: 0.95rem;
+    }
+    .track-details dt { color: var(--muted); font-weight: 500; }
+    .track-details dd { color: var(--ink); }
+    .not-found {
+      text-align: center;
+      color: var(--error);
+      padding: 1rem 0;
+    }
+    @media (max-width: 480px) {
+      .track-box { margin: 1.5rem 1rem; padding: 1.5rem 1.15rem; }
+      .track-details { grid-template-columns: 1fr; }
+      .track-details dt { margin-top: 0.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo">
+        <img src="assets/logo.png" alt="MSP e-SERVICES" class="logo-img" />
+      </a>
+      <nav class="nav">
+        <a href="index.html">Home</a>
+        <a href="apply.html">Tribal Scholarship</a>
+        <a href="track.html" class="active">Track Application</a>
+        <a href="index.html#how-it-works">How It Works</a>
+        <a href="index.html#contact">Contact</a>
+        <a href="admin.html" class="nav-cta">Admin</a>
+      </nav>
+      <button class="hamburger" aria-label="Open menu" id="hamburger">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+    <div class="mobile-nav" id="mobileNav">
+      <a href="index.html">Home</a>
+      <a href="apply.html">Tribal Scholarship</a>
+      <a href="track.html">Track Application</a>
+      <a href="index.html#how-it-works">How It Works</a>
+      <a href="index.html#contact">Contact</a>
+      <a href="admin.html">Admin Login</a>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="track-box">
+      <h1>Track Your Application</h1>
+      <p class="sub">Enter your Application ID to check the current status of your Tribal Scholarship application.</p>
+
+      <div class="form-group">
+        <label for="trackId">Application ID <span class="req">*</span></label>
+        <input type="text" id="trackId" placeholder="e.g. MSP-SCH-000001" autocomplete="off" />
+        <span class="error-msg" id="trackError"></span>
+      </div>
+
+      <button type="button" class="btn btn-primary" id="btnTrack" style="width:100%;margin-top:1rem;">
+        Check Status
+      </button>
+
+      <!-- Result -->
+      <div class="track-result hidden" id="trackResult">
+        <div id="resultContent"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <span>&copy; 2026 MSP e-SERVICES. All rights reserved.</span>
+      <span>Tribal Scholarship Application Portal</span>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+  <script src="js/db.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      // Prefill from URL if present
+      const params = new URLSearchParams(window.location.search);
+      const prefill = params.get("id");
+      if (prefill) {
+        document.getElementById("trackId").value = prefill;
+        checkStatus();
+      }
+
+      document.getElementById("btnTrack").addEventListener("click", checkStatus);
+      document.getElementById("trackId").addEventListener("keydown", function (e) {
+        if (e.key === "Enter") checkStatus();
+      });
+    });
+
+    async function checkStatus() {
+      const input = document.getElementById("trackId");
+      const errEl = document.getElementById("trackError");
+      const resultBox = document.getElementById("trackResult");
+      const resultContent = document.getElementById("resultContent");
+      const id = (input.value || "").trim().toUpperCase();
+
+      errEl.textContent = "";
+      resultBox.classList.add("hidden");
+
+      if (!id) {
+        errEl.textContent = "Please enter your Application ID.";
+        input.focus();
+        return;
+      }
+
+      if (!/^MSP-SCH-\d{6}$/i.test(id)) {
+        errEl.textContent = "Invalid format. Example: MSP-SCH-000001";
+        input.focus();
+        return;
+      }
+
+      const btn = document.getElementById("btnTrack");
+      btn.disabled = true;
+      btn.textContent = "Checking…";
+
+      try {
+        await openDB();
+        const app = await getApplication(id);
+
+        if (!app) {
+          resultContent.innerHTML = `
+            <div class="not-found">
+              <strong>No application found</strong><br>
+              Please check the Application ID and try again.
+            </div>
+          `;
+        } else {
+          const statusClass = "status-" + app.status.replace(/ /g, "\\ ");
+          resultContent.innerHTML = `
+            <div style="text-align:center;">
+              <div style="font-size:0.9rem;color:var(--muted);">Current Status</div>
+              <div class="status-large status-badge ${statusClass}">${escapeHtml(app.status)}</div>
+            </div>
+            <dl class="track-details">
+              <dt>Application ID</dt><dd><strong>${escapeHtml(app.application_id)}</strong></dd>
+              <dt>Applicant Name</dt><dd>${escapeHtml(app.full_name)}</dd>
+              <dt>Phone Number</dt><dd>${escapeHtml(app.phone_number)}</dd>
+              <dt>Present Course</dt><dd>${escapeHtml(app.present_course)}</dd>
+              <dt>Submitted On</dt><dd>${formatDate(app.created_at)}</dd>
+              <dt>Last Updated</dt><dd>${formatDate(app.updated_at)}</dd>
+            </dl>
+            ${app.admin_note ? `<div style="margin-top:1.25rem;padding:0.9rem 1rem;background:var(--paper-alt);border-radius:var(--radius);border:1px solid var(--border);font-size:0.92rem;"><strong>Note from MSP e-SERVICES:</strong><br>${escapeHtml(app.admin_note)}</div>` : ""}
+          `;
+        }
+
+        resultBox.classList.remove("hidden");
+      } catch (err) {
+        console.error(err);
+        errEl.textContent = "Unable to check status right now. Please try again.";
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Check Status";
+      }
+    }
+
+    function escapeHtml(str) {
+      if (str == null) return "";
+      const div = document.createElement("div");
+      div.textContent = String(str);
+      return div.innerHTML;
+    }
+
+    function formatDate(iso) {
+      if (!iso) return "—";
+      try {
+        return new Date(iso).toLocaleDateString("en-IN", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit"
+        });
+      } catch {
+        return iso;
+      }
+    }
+  </script>
+</body>
+</html>
